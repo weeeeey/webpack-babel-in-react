@@ -1,4 +1,5 @@
 const path = require('path');
+const RefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'); //추가
 
 module.exports = {
     name: 'wordrelay-setting',
@@ -20,19 +21,42 @@ module.exports = {
             {
                 test: /\.jsx?/,
                 loader: 'babel-loader',
-                //js나jsx파일에 바벨로더를 적용해 최신문법이 옛날 브라우저에서도 돌아갈 수 있도록 해준다.
                 options: {
-                    presets: ['@babel/preset-env', '@babel/preset-react'],
+                    presets: [
+                        [
+                            '@babel/preset-env',
+                            {
+                                targets: {
+                                    browsers: ['> 1% in KR'],
+                                },
+                            },
+                        ],
+                        '@babel/preset-react',
+                    ],
+                    plugins: [
+                        '@babel/plugin-proposal-class-properties',
+                        'react-refresh/babel', //추가됨!
+                    ],
                 },
             },
         ],
     },
-
+    plugins: [new RefreshWebpackPlugin()], //추가됨!
     output: {
-        path: path.join(__dirname, 'dist'),
+        path: path.join(__dirname, 'dist'), //__dirname은 현재폴더(lecture)
         filename: 'app.js',
-    }, //출력
-    // 결과 : 여러개의 파일을 합쳐 현재 폴더 내에 dist폴더가 생기고 그 안에 app.js라는 하나의 파일이 생성된다.
+        publicPath: '/dist', //추가, publicPath는 가상경로같은것
+    },
+
+    devServer: {
+        static: [
+            {
+                directory: path.join(__dirname, 'dist'),
+                publicPath: '/dist',
+            },
+        ],
+        hot: true,
+    }, //추가
 };
 
 /**
